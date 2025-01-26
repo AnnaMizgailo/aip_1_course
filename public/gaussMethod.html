@@ -5,14 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Калькулятор Гаусса</title>
     <link rel="stylesheet" href="../styles/styleGauss.css">
+    <script defer src="../script/gaussMethod.js"></script>
 </head>
 <body>
     <h2>Точное решение систем линейных уравнений методом Гаусса</h2>
-    <div>
-        <input type="number" placeholder="Введите количество столбцов">
-        <input type="number" placeholder="Введите количество строк">
+    <div class="userValues">
+        <input type="number" id="gauss_cols" placeholder="Введите количество столбцов" onchange="generateFieldOfVariables()">
+        <input type="number" id="gauss_rows" placeholder="Введите количество строк" onchange="generateFieldOfVariables()">
     </div>
-    <br>
+    <div id="equation_container">
+    </div>
+    <button onclick="calculateEquation()">Рассчитать корни уравнения</button>
    
 
 </body>
