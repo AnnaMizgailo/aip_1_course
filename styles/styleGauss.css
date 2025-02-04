@@ -37,7 +37,7 @@ input[type="number"]:focus {
     outline: none;
 }
 
-.userValues, #equation_container, #result {
+.userValues, #equation_container, #result, .solution {
     margin: 0 auto;
     padding: 20px;
     background-color: white;
@@ -87,6 +87,17 @@ body{
     gap: 10px;
 }
 
+#solution{
+    flex-direction: column;
+    gap: 10px;
+}
+.solution{
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+    align-items:center;
+    margin-bottom: 10px;
+}
 
 @media (max-width: 480px) {
     input[type="number"] {
