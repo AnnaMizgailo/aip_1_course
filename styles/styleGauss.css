@@ -37,7 +37,7 @@ input[type="number"]:focus {
     outline: none;
 }
 
-.userValues, #equation_container {
+.userValues, #equation_container, #result {
     margin: 0 auto;
     padding: 20px;
     background-color: white;

@@ -108,13 +108,17 @@ function makeReducedEchelonRowFormOfMatrix(matrix){
 function calculateEquation(){
     const numOfCols = document.getElementById("gauss_cols").value;
     const numOfRows = document.getElementById("gauss_rows").value;
+    const div = document.getElementById("result");
 
     checkIfAllInputsAreInserted();
 
     let matrix = makeReducedEchelonRowFormOfMatrix(formMatrix());
+    let htmlCode = "";
 
-    console.log(matrix);
-
-
-    
+    if(numOfCols == numOfRows){
+        for(i = 1; i <= numOfRows; i++){
+            htmlCode +=  '<div>x' + i + " = " + matrix[i - 1][numOfCols] + "</div>";
+        }
+    }
+    div.innerHTML = htmlCode;    
 }
