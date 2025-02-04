@@ -22,6 +22,17 @@ function generateFieldOfVariables(){
     }
     console.log(htmlCode);
     div.innerHTML = htmlCode;
+
+        generateMatrixInputs(n);
+
+        generateMatrixButton.addEventListener('click', function() {
+            const size = parseInt(nInput.value);
+            if (isNaN(size) || size <= 0) {
+                alert('Введите корректное количество неизвестных.');
+                return;
+            }
+            generateMatrixInputs(size);
+        });
     
 
 };
