@@ -64,58 +64,102 @@ function formMatrix(numOfRows, numOfCols){
     return matrix;
 }
 
+function deleteNullRowsOfMatrix(matrix, numOfRows, numOfCols){
+    for(i = 0; i < numOfRows; i++){
+        let numOfZeros = 0;
+        for(j = 0; j < numOfRows; j++){
+            if(+matrix[i][j] == 0){
+                numOfZeros++;
+            }
+        }
+        if(numOfZeros == numOfCols){
+            matrix.splice(i, 1);
+            i--;
+            numOfRows--;
+        }
+    }
+    return matrix;
+}
+
 function makeReducedEchelonRowFormOfMatrix(matrix, numOfRows, numOfCols, div){
         let lead = 0; 
         const tolerance = 1e-10;
         let htmlCode = '';
         htmlCode += "<div class='solution'> <div>Дана матрица:</div>";
         htmlCode += printMatrix(matrix, numOfRows, numOfCols - 1) + '</div>';
-    
-        for (let r = 0; r < numOfRows; r++) {
-            if (lead >= numOfCols){
-                return matrix;
-            }
-            let i = r;
-            while (Math.abs(matrix[i][lead]) < tolerance) {
-                i++;
-                if (i === numOfRows) {
-                    i = r;
-                    lead++;
-                    if (lead === numOfCols){
-                        return matrix;
-                    } 
+        try{
+            for (let r = 0; r < numOfRows; r++) {
+                if (lead >= numOfCols){
+                    return matrix;
                 }
-            }
-    
-            [matrix[i], matrix[r]] = [matrix[r], matrix[i]];
-    
-            let pivot = matrix[r][lead];
-            if (Math.abs(pivot) > tolerance) {
-                for (let j = 0; j < numOfCols; j++) {
-                    matrix[r][j] /= pivot;
+                let i = r;
+                while (Math.abs(matrix[i][lead]) < tolerance) {
+                    i++;
+                    if (i === numOfRows) {
+                        i = r;
+                        lead++;
+                        if (lead === numOfCols){
+                            return matrix;
+                        } 
+                    }
                 }
-                htmlCode += "<div class='solution'> <div>Разделим " + +(r + 1) + ' строку матрицы на ' + Math.round(pivot*1000)/1000 + ':</div>';
-                htmlCode +=  printMatrix(matrix, numOfRows, numOfCols - 1) + '</div>';
-            }
-    
-            for (let i = 0; i < numOfRows; i++) {
-                if (i !== r) {
-                    let factor = matrix[i][lead];
+        
+                [matrix[i], matrix[r]] = [matrix[r], matrix[i]];
+        
+                let pivot = matrix[r][lead];
+                if (Math.abs(pivot) > tolerance) {
                     for (let j = 0; j < numOfCols; j++) {
-                        matrix[i][j] -= factor * matrix[r][j];
-                    }  
-                    htmlCode += "<div class='solution'><div>Отнимем от элементов " + +(i + 1) + ' строки матрицы элементы ' + +(r + 1) + ' строки матрицы, умноженной на ' + Math.round(factor*1000)/1000 + ':</div>';
+                        matrix[r][j] /= pivot;
+                    }
+                    htmlCode += "<div class='solution'> <div>Разделим " + +(r + 1) + ' строку матрицы на ' + Math.round(pivot*1000)/1000 + ':</div>';
                     htmlCode +=  printMatrix(matrix, numOfRows, numOfCols - 1) + '</div>';
                 }
+        
+                for (let i = 0; i < numOfRows; i++) {
+                    if (i !== r) {
+                        let factor = matrix[i][lead];
+                        for (let j = 0; j < numOfCols; j++) {
+                            matrix[i][j] -= factor * matrix[r][j];
+                        }  
+                        htmlCode += "<div class='solution'><div>Отнимем от элементов " + +(i + 1) + ' строки матрицы элементы ' + +(r + 1) + ' строки матрицы, умноженной на ' + Math.round(factor*1000)/1000 + ':</div>';
+                        htmlCode +=  printMatrix(matrix, numOfRows, numOfCols - 1) + '</div>';
+                    }
+                }
+        
+                lead++;
+                if (r === numOfRows - 1) {
+                    matrix = deleteNullRowsOfMatrix(matrix, numOfRows, numOfCols);
+                    numOfRows = matrix.length;
+                }
             }
-    
-            lead++;
+            div.innerHTML = htmlCode;
+            document.getElementById("hideOrUnhideSolution").style.display = "flex";
+           
         }
+        catch(err){
+            console.log(err);
+        }
+        finally{
+            return matrix;
+        }
+        
+}
 
-        div.innerHTML = htmlCode;
+function hideOrUnhideSolution(){
+    const div = document.getElementById("solution");
+    const button = document.getElementById("hideOrUnhideSolution");
+    if(div.style.display == "none"){
         div.style.display = "flex";
-    
-        return matrix;
+        button.inner = "Скрыть решение";
+    }else{
+        div.style.display = "none";
+        button.innerText = "Раскрыть решение";
+    }
+}
+
+function deriveNoResult(div){
+    div.innerHTML = "Решений системы не существует";
+    div.style.display = "flex";
 }
 
 function deriveResultForSquareMatrix(matrix, numOfRows, numOfCols, div){
@@ -128,18 +172,22 @@ function deriveResultForSquareMatrix(matrix, numOfRows, numOfCols, div){
 }
 
 function calculateEquation(){
-    const numOfCols = document.getElementById("gauss_cols").value;
-    const numOfRows = document.getElementById("gauss_rows").value;
+    let arrOfNums = {numOfCols: document.getElementById("gauss_cols").value, numOfRows: document.getElementById("gauss_rows").value};
     const divResult = document.getElementById("result");
     const divSolution = document.getElementById("solution");
 
-    checkIfAllInputsAreInserted(numOfRows, numOfCols);
+    checkIfAllInputsAreInserted(arrOfNums.numOfRows, arrOfNums.numOfCols);
 
-    let matrix = makeReducedEchelonRowFormOfMatrix(formMatrix(numOfRows, numOfCols), numOfRows, +numOfCols + 1, divSolution);
+    let matrix = makeReducedEchelonRowFormOfMatrix(formMatrix(arrOfNums.numOfRows, arrOfNums.numOfCols), arrOfNums.numOfRows, +arrOfNums.numOfCols + 1, divSolution);
+    console.log(matrix);
+    arrOfNums.numOfRows = matrix.length;
 
-    if(numOfCols == numOfRows){
-       deriveResultForSquareMatrix(matrix, numOfRows, numOfCols, divResult);
+    if(arrOfNums.numOfCols == arrOfNums.numOfRows){
+       deriveResultForSquareMatrix(matrix, arrOfNums.numOfRows, arrOfNums.numOfCols, divResult);
        return;
+    }else if (arrOfNums.numOfCols < arrOfNums.numOfRows){
+        deriveNoResult(divResult);
+        return;
     }
    
 }
