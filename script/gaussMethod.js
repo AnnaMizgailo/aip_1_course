@@ -25,10 +25,18 @@ function generateFieldOfVariables(){
 // 
 }
 
-function checkIfAllInputsAreInserted(){
-    const numOfCols = document.getElementById("gauss_cols").value;
-    const numOfRows = document.getElementById("gauss_rows").value;
+function printMatrix(matrix, numOfRows, numOfCols){
+    let str = '<div>';
+    for(i = 0; i < numOfRows; i++){
+        for(j = 0; j < numOfCols; j++){
+                str += Math.round(matrix[i][j]* 1000)/1000 + " ";
+        }
+        str += "| " + Math.round(matrix[i][j]*1000)/1000 + '</div>';
+    }
+    return str;
+}
 
+function checkIfAllInputsAreInserted(numOfRows, numOfCols){
     for(i = 1; i <= numOfRows; i++){
         for(j = 1; j <= numOfCols; j++){
             if(document.getElementById("x"+i+j).value == ""){
@@ -41,14 +49,10 @@ function checkIfAllInputsAreInserted(){
             return;
         }
     }
-
-    alert("Вы ввели все коэффициенты!");
 };
 
-function formMatrix(){
+function formMatrix(numOfRows, numOfCols){
     let matrix = [];
-    const numOfCols = document.getElementById("gauss_cols").value;
-    const numOfRows = document.getElementById("gauss_rows").value;
 
     for(i = 1; i <= numOfRows; i++){
         let arr = [];
@@ -62,61 +66,130 @@ function formMatrix(){
     return matrix;
 }
 
-function makeReducedEchelonRowFormOfMatrix(matrix){
-        let lead = 0; 
-        const numOfCols = +document.getElementById("gauss_cols").value + 1;
-        const numOfRows = +document.getElementById("gauss_rows").value;
-        const tolerance = 1e-10;
-    
-        for (let r = 0; r < numOfRows; r++) {
-            if (lead >= numOfCols) return matrix;
-    
-            let i = r;
-            while (Math.abs(matrix[i][lead]) < tolerance) {
-                i++;
-                if (i === numOfRows) {
-                    i = r;
-                    lead++;
-                    if (lead === numOfCols) return matrix;
-                }
+function deleteNullRowsOfMatrix(matrix, numOfRows, numOfCols){
+    for(i = 0; i < numOfRows; i++){
+        let numOfZeros = 0;
+        for(j = 0; j < numOfRows; j++){
+            if(+matrix[i][j] == 0){
+                numOfZeros++;
             }
-    
-            [matrix[i], matrix[r]] = [matrix[r], matrix[i]];
-    
-            let pivot = matrix[r][lead];
-            if (Math.abs(pivot) > tolerance) {
-                for (let j = 0; j < numOfCols; j++) {
-                    matrix[r][j] /= pivot;
-                }
-            }
-    
-            for (let i = 0; i < numOfRows; i++) {
-                if (i !== r) {
-                    let factor = matrix[i][lead];
-                    for (let j = 0; j < numOfCols; j++) {
-                        matrix[i][j] -= factor * matrix[r][j];
-                    }
-                }
-            }
-    
-            lead++;
         }
-    
-        return matrix;
+        if(numOfZeros == numOfCols){
+            matrix.splice(i, 1);
+            i--;
+            numOfRows--;
+        }
+    }
+    return matrix;
 }
 
+function makeReducedEchelonRowFormOfMatrix(matrix, numOfRows, numOfCols, div){
+        let lead = 0; 
+        const tolerance = 1e-10;
+        let htmlCode = '';
+        htmlCode += "<div class='solution'> <div>Дана матрица:</div>";
+        htmlCode += printMatrix(matrix, numOfRows, numOfCols - 1) + '</div>';
+        try{
+            for (let r = 0; r < numOfRows; r++) {
+                if (lead >= numOfCols){
+                    return matrix;
+                }
+                let i = r;
+                while (Math.abs(matrix[i][lead]) < tolerance) {
+                    i++;
+                    if (i === numOfRows) {
+                        i = r;
+                        lead++;
+                        if (lead === numOfCols){
+                            return matrix;
+                        } 
+                    }
+                }
+        
+                [matrix[i], matrix[r]] = [matrix[r], matrix[i]];
+        
+                let pivot = matrix[r][lead];
+                if (Math.abs(pivot) > tolerance) {
+                    for (let j = 0; j < numOfCols; j++) {
+                        matrix[r][j] /= pivot;
+                    }
+                    htmlCode += "<div class='solution'> <div>Разделим " + +(r + 1) + ' строку матрицы на ' + Math.round(pivot*1000)/1000 + ':</div>';
+                    htmlCode +=  printMatrix(matrix, numOfRows, numOfCols - 1) + '</div>';
+                }
+        
+                for (let i = 0; i < numOfRows; i++) {
+                    if (i !== r) {
+                        let factor = matrix[i][lead];
+                        for (let j = 0; j < numOfCols; j++) {
+                            matrix[i][j] -= factor * matrix[r][j];
+                        }  
+                        htmlCode += "<div class='solution'><div>Отнимем от элементов " + +(i + 1) + ' строки матрицы элементы ' + +(r + 1) + ' строки матрицы, умноженной на ' + Math.round(factor*1000)/1000 + ':</div>';
+                        htmlCode +=  printMatrix(matrix, numOfRows, numOfCols - 1) + '</div>';
+                    }
+                }
+        
+                lead++;
+                if (r === numOfRows - 1) {
+                    matrix = deleteNullRowsOfMatrix(matrix, numOfRows, numOfCols);
+                    numOfRows = matrix.length;
+                }
+            }
+            div.innerHTML = htmlCode;
+            document.getElementById("hideOrUnhideSolution").style.display = "flex";
+           
+        }
+        catch(err){
+            console.log(err);
+        }
+        finally{
+            return matrix;
+        }
+        
+}
 
+function hideOrUnhideSolution(){
+    const div = document.getElementById("solution");
+    const button = document.getElementById("hideOrUnhideSolution");
+    if(div.style.display == "none"){
+        div.style.display = "flex";
+        button.inner = "Скрыть решение";
+    }else{
+        div.style.display = "none";
+        button.innerText = "Раскрыть решение";
+    }
+}
+
+function deriveNoResult(div){
+    div.innerHTML = "Решений системы не существует";
+    div.style.display = "flex";
+}
+
+function deriveResultForSquareMatrix(matrix, numOfRows, numOfCols, div){
+    let htmlCode = "";
+    for(i = 1; i <= numOfRows; i++){
+        htmlCode +=  '<div>x' + i + " = " + Math.round(matrix[i - 1][numOfCols]*1000)/1000 + "</div>";
+    }
+    div.innerHTML = htmlCode; 
+    div.style.display = "block";   
+}
 
 function calculateEquation(){
-    const numOfCols = document.getElementById("gauss_cols").value;
-    const numOfRows = document.getElementById("gauss_rows").value;
+    let arrOfNums = {numOfCols: document.getElementById("gauss_cols").value, numOfRows: document.getElementById("gauss_rows").value};
+    const divResult = document.getElementById("result");
+    const divSolution = document.getElementById("solution");
 
-    checkIfAllInputsAreInserted();
+    checkIfAllInputsAreInserted(arrOfNums.numOfRows, arrOfNums.numOfCols);
 
-    let matrix = makeReducedEchelonRowFormOfMatrix(formMatrix());
-
+    let matrix = makeReducedEchelonRowFormOfMatrix(formMatrix(arrOfNums.numOfRows, arrOfNums.numOfCols), arrOfNums.numOfRows, +arrOfNums.numOfCols + 1, divSolution);
     console.log(matrix);
+    arrOfNums.numOfRows = matrix.length;
 
-
-    
+    if(arrOfNums.numOfCols == arrOfNums.numOfRows){
+       deriveResultForSquareMatrix(matrix, arrOfNums.numOfRows, arrOfNums.numOfCols, divResult);
+       return;
+    }else if (arrOfNums.numOfCols < arrOfNums.numOfRows){
+        deriveNoResult(divResult);
+        return;
+    }
+   
 }
