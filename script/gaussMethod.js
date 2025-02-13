@@ -152,7 +152,7 @@ function hideOrUnhideSolution(){
     const button = document.getElementById("hideOrUnhideSolution");
     if(div.style.display == "none"){
         div.style.display = "flex";
-        button.inner = "Скрыть решение";
+        button.innerText = "Скрыть решение";
     }else{
         div.style.display = "none";
         button.innerText = "Раскрыть решение";
