@@ -64,3 +64,73 @@ function LagrangeInterpolation(points, x) {
 
     return result;
 }
+
+let chart; // Переменная для хранения экземпляра графика
+
+function plotLagrange(points) {  
+    const xValues = [] 
+    const yValues = []  
+
+    const minX = Math.min(...points.map(p => p.x))  
+    const maxX = Math.max(...points.map(p => p.x)) 
+    const step = (maxX - minX) / 100
+
+    for (let x = minX-step*3; x <= maxX+step*3; x += step) {  
+        xValues.push(x.toFixed(2));  
+        yValues.push(parseFloat(LagrangeInterpolation(points, x).toFixed(3)));  
+    }  
+    console.log(yValues)
+    const ctx = document.getElementById('interpolationChart');
+    if (!ctx) {
+        console.error("Element 'interpolationChart' not found in DOM.");
+        return; 
+    }
+    const context = ctx.getContext('2d');  
+
+    if (chart) {  
+        chart.destroy();  
+    }  
+    chart = new Chart(context, {  
+        type: 'line',  
+        data: {  
+            labels: xValues,  
+            datasets: [  
+                {  
+                    label: 'Интерполяция Лагранжа',  
+                    data: yValues,  
+                    borderColor: 'blue',  
+                    borderWidth: 2,  
+                    fill: false  
+                },  
+                {  
+                    label: 'Исходные точки',  
+                    data: points.map(p => ({ x: p.x, y: p.y })),
+                    borderColor: 'red',  
+                    borderWidth: 5,  
+                    pointRadius: 5,  
+                    type: 'scatter'
+                }  
+            ]  
+        },  
+        options: {  
+            scales: {  
+                x: { 
+                    type: 'linear',
+                    min : minX-step*3,
+                    max : maxX+step*3,
+                    title: {  
+                        display: true,  
+                        text: 'X'  
+                    }  
+                },  
+                y: {  
+                    type: 'linear',
+                    title: {  
+                        display: true,  
+                        text: 'Y'  
+                    }  
+                }  
+            }  
+        }  
+    }); 
+}
