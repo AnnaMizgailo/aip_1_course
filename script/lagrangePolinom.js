@@ -48,4 +48,19 @@ function calculateLagrange() {
     } 
 } 
 
+function LagrangeInterpolation(points, x) {
+    let result = 0
+    const n = points.length
 
+    for (let i = 0; i < n; i++) {
+        let term = points[i].y // y-координата точки
+        for (let j = 0; j < n; j++) {
+            if (j !== i) {
+                term *= (x - points[j].x) / (points[i].x - points[j].x)
+            }
+        }
+        result += term;
+    }
+
+    return result;
+}
