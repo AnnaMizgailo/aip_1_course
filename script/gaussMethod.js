@@ -20,9 +20,7 @@ function generateFieldOfVariables(){
         }
         htmlCode += `=<input type="number" class="coefficient" id="result` + i + `"></div>`;
     }
-    console.log(htmlCode);
     div.innerHTML = htmlCode;
-// 
 }
 
 function printMatrix(matrix, numOfRows, numOfCols){
@@ -147,6 +145,115 @@ function makeReducedEchelonRowFormOfMatrix(matrix, numOfRows, numOfCols, div){
         
 }
 
+function solveOverdeterminedSystem(matrix, rows, cols, div){
+    let augmentedMatrix = matrix.map(row => [...row]);
+
+    for (let i = 0; i < rows; i++) {
+        let pivot = augmentedMatrix[i][i];
+        if (Math.abs(pivot) < 1e-10) {
+            for (let k = i + 1; k < rows; k++) {
+                if (Math.abs(augmentedMatrix[k][i]) > 1e-10) {
+                    [augmentedMatrix[i], augmentedMatrix[k]] = 
+                    [augmentedMatrix[k], augmentedMatrix[i]];
+                    pivot = augmentedMatrix[i][i];
+                    break;
+                }
+            }
+        }
+
+        if (Math.abs(pivot) < 1e-10) continue;
+
+        for (let j = i; j < cols; j++) {
+            augmentedMatrix[i][j] /= pivot;
+        }
+
+        for (let k = 0; k < rows; k++) {
+            if (k !== i) {
+                let factor = augmentedMatrix[k][i];
+                for (let j = i; j < cols; j++) {
+                    augmentedMatrix[k][j] -= factor * augmentedMatrix[i][j];
+                }
+            }
+        }
+    }
+
+    let solution = [];
+    let freeVars = new Set();
+
+    for (let i = 0; i < cols - 1; i++) {
+        freeVars.add(i);
+    }
+
+    for (let i = 0; i < rows; i++) {
+        let pivotCol = -1;
+        for (let j = 0; j < cols - 1; j++) {
+            if (Math.abs(augmentedMatrix[i][j]) > 1e-10) {
+                pivotCol = j;
+                break;
+            }
+        }
+        if (pivotCol !== -1) {
+            freeVars.delete(pivotCol);
+        }
+    }
+
+    for (let i = 0; i < rows; i++) {
+        let pivotCol = -1;
+        for (let j = 0; j < cols - 1; j++) {
+            if (Math.abs(augmentedMatrix[i][j]) > 1e-10) {
+                pivotCol = j;
+                break;
+            }
+        }
+
+        if (pivotCol !== -1) {
+            let expression = {};
+            for (let freeVar of freeVars) {
+                if (freeVar > pivotCol) {
+                    let coeff = -augmentedMatrix[i][freeVar];
+                    if (Math.abs(coeff) > 1e-10) {
+                        expression[`x${freeVar + 1}`] = coeff;
+                    }
+                }
+            }
+            let constant = augmentedMatrix[i][cols - 1];
+            if (Math.abs(constant) > 1e-10) {
+                expression['constant'] = constant;
+            }
+            solution[pivotCol] = expression;
+        }
+    }
+
+    let resultParts = "";
+    for (let i = 0; i < cols - 1; i++) {
+        resultParts += '<div>';
+        if (freeVars.has(i)) {
+            resultParts += `x${i + 1} - свободная переменная`;
+        } else if (solution[i]) {
+            let expr = `x${i + 1} = `;
+            let terms = [];
+            for (let [varName, coeff] of Object.entries(solution[i])) {
+                if (varName === 'constant') {
+                    terms.push(coeff > 0 ? `+${formatNumber(coeff)}` : formatNumber(coeff));
+                } else {
+                    let term = coeff > 0 ? `+${formatNumber(coeff)}${varName}` : `${formatNumber(coeff)}${varName}`;
+                    terms.push(term);
+                }
+            }
+            expr += terms.join(' ') || '0';
+            resultParts += expr.trim();
+        }
+        resultParts += '</div>';
+    }
+    console.log(resultParts);
+    div.innerHTML = resultParts;
+    div.style.display = "block";
+}
+
+function formatNumber(num) {
+    return Number(num.toFixed(4)).toString().replace(/^-0$/, '0');
+}
+
 function hideOrUnhideSolution(){
     const div = document.getElementById("solution");
     const button = document.getElementById("hideOrUnhideSolution");
@@ -179,17 +286,20 @@ function calculateEquation(){
     const divSolution = document.getElementById("solution");
 
     checkIfAllInputsAreInserted(arrOfNums.numOfRows, arrOfNums.numOfCols);
+    let matrix = formMatrix(arrOfNums.numOfRows, arrOfNums.numOfCols)
 
-    let matrix = makeReducedEchelonRowFormOfMatrix(formMatrix(arrOfNums.numOfRows, arrOfNums.numOfCols), arrOfNums.numOfRows, +arrOfNums.numOfCols + 1, divSolution);
-    console.log(matrix);
-    arrOfNums.numOfRows = matrix.length;
-
-    if(arrOfNums.numOfCols == arrOfNums.numOfRows){
-       deriveResultForSquareMatrix(matrix, arrOfNums.numOfRows, arrOfNums.numOfCols, divResult);
-       return;
-    }else if (arrOfNums.numOfCols < arrOfNums.numOfRows){
-        deriveNoResult(divResult);
-        return;
+    if(arrOfNums.numOfCols > arrOfNums.numOfRows){
+        solveOverdeterminedSystem(matrix, arrOfNums.numOfRows, +arrOfNums.numOfCols + 1, divResult);
+    }else{
+        matrix = makeReducedEchelonRowFormOfMatrix(matrix, arrOfNums.numOfRows, +arrOfNums.numOfCols + 1, divSolution);
+        arrOfNums.numOfRows = matrix.length;    
+        if(arrOfNums.numOfCols == arrOfNums.numOfRows){
+            deriveResultForSquareMatrix(matrix, arrOfNums.numOfRows, arrOfNums.numOfCols, divResult);
+            return;
+         }else if (arrOfNums.numOfCols < arrOfNums.numOfRows){
+             deriveNoResult(divResult);
+             return;
+         }
     }
    
 }
