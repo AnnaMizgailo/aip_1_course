@@ -10,7 +10,7 @@ function generateFieldOfVariables(){
         htmlCode += ` <div class="string">`;
 
         for(j = 1; j <= numOfCols; j++){
-            htmlCode+=`<span class="variable"> <input type="number" class="coefficient" id="x` + i + j + `"> x` + j;
+            htmlCode+=`<span class="variable"> <input type="number" class="coefficient" id="x${i}${j}"> x${j}`;
 
             if(j != numOfCols){
                     htmlCode += ` +`;
@@ -18,14 +18,15 @@ function generateFieldOfVariables(){
 
             htmlCode += ` </span>`;
         }
-        htmlCode += `=<input type="number" class="coefficient" id="result` + i + `"></div>`;
+        htmlCode += `=<input type="number" class="coefficient" id="result${i}"></div>`;
     }
     div.innerHTML = htmlCode;
 }
 
 function printMatrix(matrix, numOfRows, numOfCols){
-    let str = '<div>';
+    let str = '';
     for(i = 0; i < numOfRows; i++){
+        str += '<div>';
         for(j = 0; j < numOfCols; j++){
                 str += Math.round(matrix[i][j]* 1000)/1000 + " ";
         }
@@ -37,12 +38,12 @@ function printMatrix(matrix, numOfRows, numOfCols){
 function checkIfAllInputsAreInserted(numOfRows, numOfCols){
     for(i = 1; i <= numOfRows; i++){
         for(j = 1; j <= numOfCols; j++){
-            if(document.getElementById("x"+i+j).value == ""){
+            if(document.getElementById(`x${i}${j}`).value == ""){
                 alert("Вы ввели не все значения коэффициентов");
                 return;
             }
         }
-        if(document.getElementById("result"+i).value == "") {
+        if(document.getElementById(`result${i}`).value == "") {
             alert("Вы ввели не все значения уравнения");
             return;
         }
@@ -55,9 +56,9 @@ function formMatrix(numOfRows, numOfCols){
     for(i = 1; i <= numOfRows; i++){
         let arr = [];
         for(j = 1; j <= numOfCols; j++){
-            arr.push(+document.getElementById("x" + i + j).value);
+            arr.push(+document.getElementById(`x${i}${j}`).value);
         }
-        arr.push(+document.getElementById("result" + i).value);
+        arr.push(+document.getElementById(`result${i}`).value);
         matrix.push(arr);
     }
 
@@ -111,7 +112,7 @@ function makeReducedEchelonRowFormOfMatrix(matrix, numOfRows, numOfCols, div){
                     for (let j = 0; j < numOfCols; j++) {
                         matrix[r][j] /= pivot;
                     }
-                    htmlCode += "<div class='solution'> <div>Разделим " + +(r + 1) + ' строку матрицы на ' + Math.round(pivot*1000)/1000 + ':</div>';
+                    htmlCode += `<div class='solution'> <div>Разделим ${r + 1} строку матрицы на ${Math.round(pivot*1000)/1000}:</div>`;
                     htmlCode +=  printMatrix(matrix, numOfRows, numOfCols - 1) + '</div>';
                 }
         
@@ -121,7 +122,7 @@ function makeReducedEchelonRowFormOfMatrix(matrix, numOfRows, numOfCols, div){
                         for (let j = 0; j < numOfCols; j++) {
                             matrix[i][j] -= factor * matrix[r][j];
                         }  
-                        htmlCode += "<div class='solution'><div>Отнимем от элементов " + +(i + 1) + ' строки матрицы элементы ' + +(r + 1) + ' строки матрицы, умноженной на ' + Math.round(factor*1000)/1000 + ':</div>';
+                        htmlCode += `<div class='solution'><div>Отнимем от элементов ${i + 1} строки матрицы элементы ${r + 1} строки матрицы, умноженной на ${Math.round(factor*1000)/1000}:</div>`;
                         htmlCode +=  printMatrix(matrix, numOfRows, numOfCols - 1) + '</div>';
                     }
                 }
@@ -145,8 +146,11 @@ function makeReducedEchelonRowFormOfMatrix(matrix, numOfRows, numOfCols, div){
         
 }
 
-function solveOverdeterminedSystem(matrix, rows, cols, div){
+function solveOverdeterminedSystem(matrix, rows, cols, divRes, divSol){
     let augmentedMatrix = matrix.map(row => [...row]);
+    let htmlCode = "<div class='solution'><div>Дана матрица: </div>"
+    htmlCode += printMatrix(augmentedMatrix, rows, cols - 1);
+    htmlCode += "</div>";
 
     for (let i = 0; i < rows; i++) {
         let pivot = augmentedMatrix[i][i];
@@ -163,18 +167,25 @@ function solveOverdeterminedSystem(matrix, rows, cols, div){
 
         if (Math.abs(pivot) < 1e-10) continue;
 
+        
+        htmlCode +=`<div class = "solution"><div>Умножим ${i + 1} ряд на ${pivot}:</div>`;
         for (let j = i; j < cols; j++) {
             augmentedMatrix[i][j] /= pivot;
         }
+        htmlCode += printMatrix(augmentedMatrix, rows, cols - 1) + '</div>';
 
         for (let k = 0; k < rows; k++) {
             if (k !== i) {
                 let factor = augmentedMatrix[k][i];
+                htmlCode +=`<div class = "solution"><div>Отнимем от ${k + 1} ряда ${i + 1} ряд, умноженный на ${factor}:</div>`;
                 for (let j = i; j < cols; j++) {
                     augmentedMatrix[k][j] -= factor * augmentedMatrix[i][j];
                 }
+                htmlCode += printMatrix(augmentedMatrix, rows, cols - 1) + '</div>';
             }
+            
         }
+        
     }
 
     let solution = [];
@@ -245,13 +256,14 @@ function solveOverdeterminedSystem(matrix, rows, cols, div){
         }
         resultParts += '</div>';
     }
-    console.log(resultParts);
-    div.innerHTML = resultParts;
-    div.style.display = "block";
+    divRes.innerHTML = resultParts;
+    divRes.style.display = "block";
+    divSol.innerHTML = htmlCode;
+    document.getElementById("hideOrUnhideSolution").style.display = "flex";
 }
 
 function formatNumber(num) {
-    return Number(num.toFixed(4)).toString().replace(/^-0$/, '0');
+    return Number(num.toFixed(3)).toString().replace(/^-0$/, '0');
 }
 
 function hideOrUnhideSolution(){
@@ -289,7 +301,7 @@ function calculateEquation(){
     let matrix = formMatrix(arrOfNums.numOfRows, arrOfNums.numOfCols)
 
     if(arrOfNums.numOfCols > arrOfNums.numOfRows){
-        solveOverdeterminedSystem(matrix, arrOfNums.numOfRows, +arrOfNums.numOfCols + 1, divResult);
+        solveOverdeterminedSystem(matrix, arrOfNums.numOfRows, +arrOfNums.numOfCols + 1, divResult, divSolution);
     }else{
         matrix = makeReducedEchelonRowFormOfMatrix(matrix, arrOfNums.numOfRows, +arrOfNums.numOfCols + 1, divSolution);
         arrOfNums.numOfRows = matrix.length;    
