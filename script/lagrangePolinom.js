@@ -45,6 +45,16 @@ function formatLagrangePolynomial(points) {
     return polynomial;
 }
 
+function convertToMathJax(expression) {
+    try {
+        const expr = math.parse(expression);
+        return expr.toTex();
+    } catch (error) {
+        console.error("Ошибка при преобразовании выражения в LaTeX:", error)
+        return expression
+    }
+}
+
 function calculateLagrange() {
     const xValue = parseFloat(document.getElementById('x').value);
     if (isNaN(xValue)) {
