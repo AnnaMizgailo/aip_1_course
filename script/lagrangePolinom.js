@@ -14,6 +14,26 @@ function removeRow(button) {
     row.parentNode.removeChild(row); //удаление из родителя
 }
 
+function formatLagrangePolynomial(points) {
+    let polynomial = ''
+    const n = points.length
+
+    for (let i = 0; i < n; i++) {
+        let term = `${points[i].y}`
+        for (let j = 0; j < n; j++) {
+            if (j !== i) {
+                term += ` * (x - ${points[j].x}) / (${points[i].x} - ${points[j].x})`
+            }
+        }
+        if (i > 0) {
+            polynomial += ' + '
+        }
+        polynomial += `(${term})`
+    }
+
+    return polynomial;
+}
+
 function calculateLagrange() {
     const xValue = parseFloat(document.getElementById('x').value);
     if (isNaN(xValue)) {
