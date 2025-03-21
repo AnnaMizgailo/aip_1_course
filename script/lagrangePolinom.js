@@ -56,13 +56,13 @@ function convertToMathJax(expression) {
 }
 
 function calculateLagrange() {
-    const xValue = parseFloat(document.getElementById('x').value);
+    const xValue = parseFloat(document.getElementById('x').value)
     if (isNaN(xValue)) {
         alert("Введите значение Х для интерполяции")
         return
     }
 
-    const points = [];
+    const points = []
     const xInputs = document.querySelectorAll('.x-input')
     const yInputs = document.querySelectorAll('.y-input')
 
@@ -82,7 +82,7 @@ function calculateLagrange() {
         alert("Ошибка: недостаточно данных! \nДобавьте ещё хотя бы одну точку")
         return
     } else {
-        const resultDiv = document.getElementById('result');
+        const resultDiv = document.getElementById('result')
         const fullPolynomialDiv = document.getElementById('fullPolynomial')
         const simplifiedPolynomialDiv = document.getElementById('simplifiedPolynomial')
 
@@ -90,10 +90,16 @@ function calculateLagrange() {
         resultDiv.innerHTML = "Интерполяционное значение f(" + xValue + ") = " + resultInterpolate
 
         const fullPolynomial = formatLagrangePolynomial(points)
-        fullPolynomialDiv.textContent = fullPolynomial;
+        const fullPolynomialMathJax = convertToMathJax(fullPolynomial)
+        fullPolynomialDiv.innerHTML = `\\(${fullPolynomialMathJax}\\)`
 
         const simplifiedPolynomial = simplifyPolynomial(fullPolynomial)
-        simplifiedPolynomialDiv.textContent = simplifiedPolynomial
+        const simplifiedPolynomialMathJax = convertToMathJax(simplifiedPolynomial)
+        simplifiedPolynomialDiv.innerHTML = `\\(${simplifiedPolynomialMathJax}\\)`
+
+        if (window.MathJax) {
+            window.MathJax.typesetPromise([fullPolynomialDiv, simplifiedPolynomialDiv])
+        }
 
         plotLagrange(points)
     }
