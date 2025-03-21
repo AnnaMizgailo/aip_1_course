@@ -16,11 +16,12 @@ function removeRow(button) {
 
 function simplifyPolynomial(polynomial) {
     try {
-        const simplified = math.simplify(polynomial)
+        const expr = math.parse(polynomial)
+        const simplified = math.simplify(expr)
         return simplified.toString()
     } catch (error) {
         console.error("Ошибка при упрощении многочлена:", error)
-        return polynomial // возвращаем исходный многочлен, если упрощение не удалось
+        return polynomial
     }
 }
 
