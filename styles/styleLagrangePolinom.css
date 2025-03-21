@@ -55,3 +55,13 @@ button:hover {
     background-color: #e9ecef;
     border-radius: 4px;
 }
+.polynomial {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.2em;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    white-space: pre-wrap; 
+    margin-bottom: 10px; 
+}
