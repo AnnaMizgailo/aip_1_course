@@ -14,39 +14,49 @@ function removeRow(button) {
     row.parentNode.removeChild(row); //удаление из родителя
 }
 
-function calculateLagrange() { 
-    const xValue = parseFloat(document.getElementById('x').value)
-    if (isNaN(xValue)) { 
-        alert("Введите значение Х для интерполяции") // сообщение об ошибке 
-        return // прекращаем выполнение функции 
-    } 
+function calculateLagrange() {
+    const xValue = parseFloat(document.getElementById('x').value);
+    if (isNaN(xValue)) {
+        alert("Введите значение Х для интерполяции")
+        return
+    }
 
-    const points = []; 
-    const xInputs = document.querySelectorAll('.x-input') // все поля для x 
-    const yInputs = document.querySelectorAll('.y-input') // все поля для y 
+    const points = [];
+    const xInputs = document.querySelectorAll('.x-input')
+    const yInputs = document.querySelectorAll('.y-input')
 
-    for (let i = 0; i < xInputs.length; i++) { 
-        const x = parseFloat(xInputs[i].value) // из строки в число 
-        const y = parseFloat(yInputs[i].value) 
-        if (xInputs[i].value.trim() === "" || yInputs[i].value.trim() === "") { // проверка на пустое значение 
-            alert("Ошибка: недостаточно данных! \nВведите значения для всех полей"); // сообщение об ошибке 
-            return; // прекращаем выполнение функции 
-        } 
-        if (!isNaN(x) && !isNaN(y)) { 
-            points.push({x, y}) // добавление в массив 
-        } 
-    } 
-    console.log(points)
-    if (points.length < 2) { 
-        alert("Ошибка: недостаточно данных! \nДобавьте ещё хотя бы одну точку") // сообщение об ошибке 
-        return; // прекращаем выполнение функции 
-    } else { 
-        const resultDiv = document.getElementById('result');  
-        let resultInterpolate = LagrangeInterpolation(points, xValue).toFixed(3) // получение значения интерполяции 
-        resultDiv.innerHTML = "Интерполяционное значение f(" + xValue + ") = " + resultInterpolate 
+    for (let i = 0; i < xInputs.length; i++) {
+        const x = parseFloat(xInputs[i].value)
+        const y = parseFloat(yInputs[i].value)
+        if (xInputs[i].value.trim() === "" || yInputs[i].value.trim() === "") {
+            alert("Ошибка: недостаточно данных! \nВведите значения для всех полей")
+            return
+        }
+        if (!isNaN(x) && !isNaN(y)) {
+            points.push({ x, y })
+        }
+    }
+
+    if (points.length < 2) {
+        alert("Ошибка: недостаточно данных! \nДобавьте ещё хотя бы одну точку")
+        return
+    } else {
+        const resultDiv = document.getElementById('result');
+        const fullPolynomialDiv = document.getElementById('fullPolynomial')
+        const simplifiedPolynomialDiv = document.getElementById('simplifiedPolynomial')
+
+        let resultInterpolate = LagrangeInterpolation(points, xValue).toFixed(3)
+        resultDiv.innerHTML = "Интерполяционное значение f(" + xValue + ") = " + resultInterpolate
+
+        const fullPolynomial = formatLagrangePolynomial(points)
+        fullPolynomialDiv.textContent = fullPolynomial;
+
+        const simplifiedPolynomial = simplifyPolynomial(fullPolynomial)
+        simplifiedPolynomialDiv.textContent = simplifiedPolynomial
+
         plotLagrange(points)
-    } 
-} 
+    }
+}
 
 function LagrangeInterpolation(points, x) {
     let result = 0
