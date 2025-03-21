@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="../styles/styleLagrangePolinom.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.7.0/math.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script defer src="../script/lagrangePolinom.js"></script>
 </head>
 <body>
@@ -42,6 +44,16 @@
         <button onclick="calculateLagrange()">Вычислить</button>
         
         <div class="result" id="result"></div>
+        
+        <div class="form-group">
+            <label for="fullPolynomial">Полная форма многочлена Лагранжа:</label>
+            <div id="fullPolynomial" class="polynomial"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="simplifiedPolynomial">Упрощённая форма многочлена Лагранжа:</label>
+            <div id="simplifiedPolynomial" class="polynomial"></div>
+        </div>
     </div>
     <canvas id="interpolationChart" width="400" height="200"></canvas>
     
