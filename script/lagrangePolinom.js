@@ -14,6 +14,16 @@ function removeRow(button) {
     row.parentNode.removeChild(row); //удаление из родителя
 }
 
+function simplifyPolynomial(polynomial) {
+    try {
+        const simplified = math.simplify(polynomial)
+        return simplified.toString()
+    } catch (error) {
+        console.error("Ошибка при упрощении многочлена:", error)
+        return polynomial // возвращаем исходный многочлен, если упрощение не удалось
+    }
+}
+
 function formatLagrangePolynomial(points) {
     let polynomial = ''
     const n = points.length
