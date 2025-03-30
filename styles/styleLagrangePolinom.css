@@ -54,4 +54,17 @@ button:hover {
     padding: 10px;
     background-color: #e9ecef;
     border-radius: 4px;
+    text-align: center;
+}
+.polynomial {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 2em;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 8px; 
+    white-space: pre-wrap; 
+    margin-bottom: 15px;
+    line-height: 1.6;
+    text-align: center;
 }
