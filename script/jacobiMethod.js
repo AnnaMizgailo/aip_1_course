@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const cell = row.insertCell();
             const input = document.createElement('input');
             input.type = 'number';
+            input.step = "any";
             if(j !== cols - 1){
                 input.id = "x" + i + j;
             }else{
@@ -162,9 +163,9 @@ document.addEventListener('DOMContentLoaded', function() {
           const cell = row.insertCell();
           let value;
           if (j === n) {
-              value = parseFloat(document.getElementById("result" + i).value).toFixed();
+              value = parseFloat(document.getElementById("result" + i).value).toFixed(3);
           } else {
-              value = parseFloat(document.getElementById("x" + i + j).value).toFixed();
+              value = parseFloat(document.getElementById("x" + i + j).value).toFixed(3);
           }
           cell.textContent = value;
       }
