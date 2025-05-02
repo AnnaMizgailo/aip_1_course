@@ -1,5 +1,6 @@
 generateFieldOfVariables();
 
+//генерация полей с коэффициентами
 function generateFieldOfVariables(){
     const numOfCols = document.getElementById("gauss_cols").value;
     const numOfRows = document.getElementById("gauss_rows").value;
@@ -23,18 +24,20 @@ function generateFieldOfVariables(){
     div.innerHTML = htmlCode;
 }
 
+//функция вывода матрицы
 function printMatrix(matrix, numOfRows, numOfCols){
     let str = '';
-    for(i = 0; i < numOfRows; i++){
+    for(let i = 0; i < numOfRows; i++){
         str += '<div>';
-        for(j = 0; j < numOfCols; j++){
-                str += Math.round(matrix[i][j]* 1000)/1000 + " ";
+        for(let j = 0; j < numOfCols; j++){
+            str += Math.round(matrix[i][j]* 1000)/1000 + " ";
         }
-        str += "| " + Math.round(matrix[i][j]*1000)/1000 + '</div>';
+        str += "| " + Math.round(matrix[i][numOfCols]*1000)/1000 + '</div>';
     }
     return str;
 }
 
+//проверка на корректный ввод (все поля заполнены)
 function checkIfAllInputsAreInserted(numOfRows, numOfCols){
     for(i = 1; i <= numOfRows; i++){
         for(j = 1; j <= numOfCols; j++){
@@ -50,6 +53,7 @@ function checkIfAllInputsAreInserted(numOfRows, numOfCols){
     }
 };
 
+//функция на формирование матрицы считыванием из полей коэффициентов
 function formMatrix(numOfRows, numOfCols){
     let matrix = [];
 
@@ -65,6 +69,7 @@ function formMatrix(numOfRows, numOfCols){
     return matrix;
 }
 
+//удаляет пустые строки матрицы в результате исполнения алгоритма Гаусса
 function deleteNullRowsOfMatrix(matrix, numOfRows, numOfCols){
     for(i = 0; i < numOfRows; i++){
         let numOfZeros = 0;
@@ -82,6 +87,7 @@ function deleteNullRowsOfMatrix(matrix, numOfRows, numOfCols){
     return matrix;
 }
 
+//приводит матрицу к приведенно-ступенчатой форме по методу Гаусса
 function makeReducedEchelonRowFormOfMatrix(matrix, numOfRows, numOfCols, div){
         let lead = 0; 
         const tolerance = 1e-10;
@@ -146,6 +152,7 @@ function makeReducedEchelonRowFormOfMatrix(matrix, numOfRows, numOfCols, div){
         
 }
 
+//решает систему для случая, когда столбцов больше, чем строк
 function solveOverdeterminedSystem(matrix, rows, cols, divRes, divSol){
     let augmentedMatrix = matrix.map(row => [...row]);
     let htmlCode = "<div class='solution'><div>Дана матрица: </div>"
@@ -262,10 +269,12 @@ function solveOverdeterminedSystem(matrix, rows, cols, divRes, divSol){
     document.getElementById("hideOrUnhideSolution").style.display = "flex";
 }
 
+//функция для округления чисел
 function formatNumber(num) {
     return Number(num.toFixed(3)).toString().replace(/^-0$/, '0');
 }
 
+//функция, которая скрывает/раскрывает решение при нажатии на кнопку
 function hideOrUnhideSolution(){
     const div = document.getElementById("solution");
     const button = document.getElementById("hideOrUnhideSolution");
@@ -278,11 +287,13 @@ function hideOrUnhideSolution(){
     }
 }
 
+//функция для отображения того, что результата не существует
 function deriveNoResult(div){
     div.innerHTML = "Решений системы не существует";
     div.style.display = "flex";
 }
 
+//функция, выводящая результат для квадратной матрицы
 function deriveResultForSquareMatrix(matrix, numOfRows, numOfCols, div){
     let htmlCode = "";
     for(i = 1; i <= numOfRows; i++){
@@ -292,6 +303,7 @@ function deriveResultForSquareMatrix(matrix, numOfRows, numOfCols, div){
     div.style.display = "block";   
 }
 
+//основная функция для расчета корней уравнения
 function calculateEquation(){
     let arrOfNums = {numOfCols: document.getElementById("gauss_cols").value, numOfRows: document.getElementById("gauss_rows").value};
     const divResult = document.getElementById("result");
@@ -304,14 +316,25 @@ function calculateEquation(){
         solveOverdeterminedSystem(matrix, arrOfNums.numOfRows, +arrOfNums.numOfCols + 1, divResult, divSolution);
     }else{
         matrix = makeReducedEchelonRowFormOfMatrix(matrix, arrOfNums.numOfRows, +arrOfNums.numOfCols + 1, divSolution);
-        arrOfNums.numOfRows = matrix.length;    
-        if(arrOfNums.numOfCols == arrOfNums.numOfRows){
+        arrOfNums.numOfRows = matrix.length;
+    
+        let hasContradiction = matrix.some(row => {
+            let allZero = row.slice(0, arrOfNums.numOfCols).every(val => Math.abs(val) < 1e-10);
+            let lastVal = Math.abs(row[arrOfNums.numOfCols]) > 1e-10;
+            return allZero && lastVal;
+        });
+    
+        if (hasContradiction) {
+            deriveNoResult(divResult);
+            return;
+        }
+    
+        if (arrOfNums.numOfCols == arrOfNums.numOfRows) {
             deriveResultForSquareMatrix(matrix, arrOfNums.numOfRows, arrOfNums.numOfCols, divResult);
             return;
-         }else if (arrOfNums.numOfCols < arrOfNums.numOfRows){
-             deriveNoResult(divResult);
-             return;
-         }
+        } else {
+            solveOverdeterminedSystem(matrix, arrOfNums.numOfRows, +arrOfNums.numOfCols + 1, divResult, divSolution);
+        }
     }
    
 }
